@@ -3,27 +3,42 @@
 {% block title %}Plotting{% endblock %}
 
 {% block content %}
-<h1><strong>Set the interval to plot</strong></h1>
+<h1><strong>Function Plotter</strong></h1>
 <form action="{{ url_for('plot') }}" method="post">
-    <label for="from_num">From:</label>
-    <input type="number" id="from_num" name="xleft" required>
-    
-    <label for="to_num">To:</label>
-    <input type="number" id="to_num" name="xright" required>
-    
-    <label for="function">Function:</label>
-    <select name="function" id="function">
-        {% for func in functions %}
-        <option value="{{ func }}" {% if selected_func == func %}selected{% endif %}>{{ func }}</option>
-        {% endfor %}
-    </select>
-    
-    <button type="submit">Plot</button>
+   <div style="margin-bottom: 15px;">
+       <label for="from_num">From:</label>
+       <input type="number" id="from_num" name="xleft" required>
+       
+       <label for="to_num">To:</label>
+       <input type="number" id="to_num" name="xright" required>
+   </div>
+   
+   <div style="margin-bottom: 15px;">
+       <label>Functions:</label><br>
+       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+           {% for func in functions %}
+           <label style="min-width: 100px;">
+               <input type="checkbox" name="functions" value="{{ func }}" 
+                      {% if selected_funcs and func in selected_funcs %}checked{% endif %}>
+               {{ func }}
+           </label>
+           {% endfor %}
+       </div>
+   </div>
+   
+   <div style="margin-bottom: 15px;">
+       <label>
+           <input type="checkbox" name="grid" {% if show_grid %}checked{% endif %}>
+           Show Grid
+       </label>
+   </div>
+   
+   <button type="submit">Plot</button>
 </form>
 
 {% if image_path %}
-    <div>
-        <img src="{{ url_for('static', filename='images/plot.png') }}" width="540">
-    </div>
+   <div style="width: 500px; margin-top: 20px;">
+       <img src="{{ url_for('static', filename='images/plot.png') }}" width="100%">
+   </div>
 {% endif %}
 {% endblock %}

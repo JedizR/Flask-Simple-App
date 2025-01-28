@@ -8,10 +8,12 @@ app = Flask(__name__)
 
 def get_function(func_name, x):
    functions = {
-       'sin': np.sin(x),
-       'cos': np.cos(x),
-       'square': x**2,
-       'sqrt': np.sqrt(np.abs(x))
+       'sin': (np.sin(x), 'Sin(x)'),
+       'cos': (np.cos(x), 'Cos(x)'),
+       'square': (x**2, 'x²'),
+       'sqrt': (np.sqrt(np.abs(x)), '√|x|'),
+       'linear': (x, 'x'),
+       'cubic': (x**3, 'x³')
    }
    return functions.get(func_name)
 
@@ -27,21 +29,30 @@ def show_squared_num_from_url(num_1, num_2):
 
 @app.route("/plot", methods=["GET", "POST"])
 def plot():
+    functions = ['sin', 'cos', 'square', 'sqrt', 'linear', 'cubic']
+    colors = ['blue', 'red', 'green', 'purple', 'orange', 'brown']
     if request.method == "POST":
         xleft = int(request.form["xleft"])
         xright = int(request.form["xright"])
-        func = request.form["function"]
+        selected_funcs = request.form.getlist("functions")
+        show_grid = 'grid' in request.form
+        plt.figure(figsize=(10, 6))
         x = np.linspace(xleft, xright, 100)
-        y = get_function(func, x)
-        plt.figure()
-        plt.plot(x, y)
-        plt.grid(True)
+        for i, func in enumerate(selected_funcs):
+            y, label = get_function(func, x)
+            plt.plot(x, y, label=label, color=colors[i])
+        plt.legend()
+        plt.title('Selected Functions')
+        plt.xlabel('x')
+        plt.ylabel('y')
+        if show_grid:
+            plt.grid(True)
         image_name = f"static/images/plot.png"
         plt.savefig(image_name)
         plt.close()
         return render_template("plotter.html", 
                             image_path=image_name,
-                            functions=['sin', 'cos', 'square', 'sqrt'],
-                            selected_func=func)
-    return render_template("plotter.html", 
-                        functions=['sin', 'cos', 'square', 'sqrt'])
+                            functions=functions,
+                            selected_funcs=selected_funcs,
+                            show_grid=show_grid)
+    return render_template("plotter.html", functions=functions)
